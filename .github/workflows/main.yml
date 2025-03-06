@@ -49,14 +49,18 @@ jobs:
         # 下载并上传所有资产到新发布
         for asset in $assets; do
           file_name=$(basename "$asset")
-          echo "Downloading $file_name and uploading to release"
+          new_file_name="${file_name%.zip}.xpi" # 修改后缀
+          echo "Downloading $file_name and renaming to $new_file_name"
           
           # 下载文件
           curl -L -o "$file_name" "$asset"
           
+          # 重命名文件
+          mv "$file_name" "$new_file_name"
+          
           # 上传文件到发布
           curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
             -H "Content-Type: application/octet-stream" \
-            --data-binary @"$file_name" \
-            "https://uploads.github.com/repos/klcb2010/violentmonkey/releases/$release_id/assets?name=$file_name"
+            --data-binary @"$new_file_name" \
+            "https://uploads.github.com/repos/klcb2010/violentmonkey/releases/$release_id/assets?name=$new_file_name"
         done
